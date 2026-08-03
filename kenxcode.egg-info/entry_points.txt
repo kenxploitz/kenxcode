@@ -1,0 +1,4 @@
+[console_scripts]
+kenxcode = kenxcode_cli.main:main
+kenxcode-acp = acp_adapter.entry:main
+kenxcode-agent = run_agent:main

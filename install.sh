@@ -124,12 +124,13 @@ do_install() {
 
     printf "\n"
 
-    # ── STEP 2: Install uv (Python package manager) ──
+    # ── STEP 2: Install uv & Python 3.11 ──
     printf "  ${CYAN}═══════════════════════════════════════════════════════${NC}\n"
-    printf "  ${BOLD}STEP 2: INSTALL UV (Python Package Manager)${NC}\n"
+    printf "  ${BOLD}STEP 2: INSTALL UV & PYTHON 3.11${NC}\n"
     printf "  ${CYAN}═══════════════════════════════════════════════════════${NC}\n"
     printf "\n"
 
+    # Install uv
     if command -v uv >/dev/null 2>&1; then
         success "uv already installed: $(uv --version 2>&1)"
     else
@@ -143,6 +144,11 @@ do_install() {
             exit 1
         fi
     fi
+
+    # Install Python 3.11 via uv (handles version mismatch automatically)
+    info "Installing Python 3.11 via uv..."
+    uv python install 3.11 2>&1 | tail -3
+    success "Python 3.11 ready"
 
     printf "\n"
 
@@ -159,7 +165,7 @@ do_install() {
     else
         info "Cloning KenXCode..."
         mkdir -p "$INSTALL_DIR"
-        git clone --depth 1 https://github.com/kenxfear/kenxcode.git "$INSTALL_DIR/kenxcode-agent" 2>&1 | tail -3
+        git clone --depth 1 https://github.com/kenxploitz/kenxcode.git "$INSTALL_DIR/kenxcode-agent" 2>&1 | tail -3
     fi
 
     if [ ! -d "$INSTALL_DIR/kenxcode-agent" ]; then
@@ -169,13 +175,14 @@ do_install() {
     success "KenXCode source ready"
 
     # Create venv and install
-    info "Creating Python virtual environment..."
+    info "Creating Python 3.11 virtual environment..."
     cd "$INSTALL_DIR/kenxcode-agent"
-    uv venv "$INSTALL_DIR/venv" --python 3.11 2>&1 | tail -3
+    rm -rf "$INSTALL_DIR/venv" 2>/dev/null
+    uv venv "$INSTALL_DIR/venv" --python 3.11 --clear 2>&1 | tail -3
 
     info "Installing KenXCode package..."
     source "$INSTALL_DIR/venv/bin/activate"
-    uv pip install -e ".[all]" 2>&1 | tail -5
+    uv pip install -e "." 2>&1 | tail -5
 
     if [ $? -eq 0 ]; then
         success "KenXCode installed"
@@ -297,13 +304,15 @@ CFGEOF
 export KENXCODE_HOME="$HOME/.kenxcode"
 export HERMES_HOME="$KENXCODE_HOME"
 
-# Activate venv
-if [ -f "$KENXCODE_HOME/venv/bin/activate" ]; then
-    . "$KENXCODE_HOME/venv/bin/activate"
+# Use venv Python directly (handles version mismatch)
+VENV_PYTHON="$KENXCODE_HOME/venv/bin/python3"
+if [ ! -x "$VENV_PYTHON" ]; then
+    echo "Error: KenXCode venv not found. Run: ./install.sh"
+    exit 1
 fi
 
-# Run kenxcode
-exec python3 -m kenxcode_cli.main "$@"
+# Run kenxcode with venv Python
+exec "$VENV_PYTHON" -m kenxcode_cli.main "$@"
 WRAPPER
     chmod +x "$HOME/.local/bin/kenxcode"
     success "CLI wrapper created"
