@@ -7,11 +7,13 @@ Based on [Hermes Agent](https://github.com/NousResearch/hermes-agent) by Nous Re
 ## Quick Install
 
 ```bash
-# One-liner install (recommended)
-curl -fsSL https://raw.githubusercontent.com/kenxploitz/kenxcode/main/kenxcode.sh | sh
+# One-liner install (download & run)
+curl -fsSL https://raw.githubusercontent.com/kenxploitz/kenxcode/main/kenxcode.sh -o /tmp/kenxcode.sh && chmod +x /tmp/kenxcode.sh && /tmp/kenxcode.sh
 
 # Or clone + install
-git clone https://github.com/kenxploitz/kenxcode.git && cd kenxcode && chmod +x kenxcode.sh && ./kenxcode.sh
+git clone https://github.com/kenxploitz/kenxcode.git
+cd kenxcode
+./kenxcode.sh
 ```
 
 ## What You Get
