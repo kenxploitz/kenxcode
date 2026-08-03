@@ -164,14 +164,17 @@ do_install() {
     info "Installing KenXCode package..."
     cd "$INSTALL_DIR/kenxcode-agent"
     
-    # Install with pip (not editable mode for reliability)
+    # Ensure pip is available
+    "$INSTALL_DIR/venv/bin/python3" -m ensurepip 2>&1 | tail -2
+    
+    # Install dependencies and package
     "$INSTALL_DIR/venv/bin/python3" -m pip install . 2>&1 | tail -5
     
     # Verify installation
     if "$INSTALL_DIR/venv/bin/python3" -c "import kenxcode_cli" 2>/dev/null; then
         success "KenXCode installed"
     else
-        warn "Install may have failed, trying editable mode..."
+        warn "Normal install failed, trying editable mode..."
         "$INSTALL_DIR/venv/bin/python3" -m pip install -e . 2>&1 | tail -5
         
         if "$INSTALL_DIR/venv/bin/python3" -c "import kenxcode_cli" 2>/dev/null; then
