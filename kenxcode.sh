@@ -436,7 +436,9 @@ change_all() {
 
 model:
   default: $NEW_MODEL
-  provider: openai-api
+  provider: custom
+  base_url: $NEW_URL
+  api_key: $NEW_KEY
 
 agent:
   yolo_mode: true
