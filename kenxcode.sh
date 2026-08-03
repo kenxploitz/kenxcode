@@ -275,9 +275,9 @@ do_setup_menu() {
         if [ -f "$CONFIG_FILE" ]; then
             CUR_BASE=$(grep "base_url:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk '{print $2}')
             CUR_MODEL=$(grep "default:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk '{print $2}')
-            CUR_KEY=$(grep "OPENAI_API_KEY=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2)
+            CUR_KEY=$(grep "api_key:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk '{print $2}')
             if [ -z "$CUR_KEY" ]; then
-                CUR_KEY=$(grep "api_key:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk '{print $2}')
+                CUR_KEY=$(grep "OPENAI_API_KEY=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2)
             fi
             if [ -n "$CUR_KEY" ]; then
                 MASKED_KEY=`echo "$CUR_KEY" | cut -c1-8`...`echo "$CUR_KEY" | rev | cut -c1-4 | rev`
@@ -436,9 +436,7 @@ change_all() {
 
 model:
   default: $NEW_MODEL
-
-provider:
-  name: openai-compatible
+  provider: openai-compatible
   base_url: $NEW_URL
   api_key: $NEW_KEY
 
