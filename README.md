@@ -11,9 +11,18 @@ Based on [Hermes Agent](https://github.com/NousResearch/hermes-agent) by Nous Re
 curl -fsSL https://raw.githubusercontent.com/kenxploitz/kenxcode/main/kenxcode.sh -o /tmp/kenxcode.sh && chmod +x /tmp/kenxcode.sh && /tmp/kenxcode.sh
 
 # Or clone + install
-git clone https://github.com/kenxploitz/kenxcode.git
-cd kenxcode
+git clone https://github.com/kenxploitz/kenxcode.git && cd kenxcode && ./kenxcode.sh
+```
+
+## Update
+
+```bash
+# One-liner update
+curl -fsSL https://raw.githubusercontent.com/kenxploitz/kenxcode/main/update.sh | sh
+
+# Or from menu
 ./kenxcode.sh
+# → Select 6) Update KenXCode
 ```
 
 ## What You Get
