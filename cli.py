@@ -11218,7 +11218,10 @@ class KenXCodeCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
             (getattr(self.agent, "provider", None) if self.agent else None)
             or getattr(self, "provider", None)
         )
-        normalized = str(provider or "").strip().lower()
+        if isinstance(provider, dict):
+            normalized = str(provider.get("name") or "").strip().lower()
+        else:
+            normalized = str(provider or "").strip().lower()
         if normalized != "openai-codex":
             print("  Banked usage resets are only available on the openai-codex provider.")
             print("  Switch with `/model` or `kenxcode auth` first.")
@@ -13698,10 +13701,10 @@ class KenXCodeCLI(CLIAgentSetupMixin, CLICommandsMixin, CLIBillingMixin):
                 from kenxcode_cli.config import load_config
 
                 _img_mode = decide_image_input_mode(
-                    (self.provider or "").strip(),
-                    (self.model or "").strip(),
+                    str(self.provider.get("name", "") if isinstance(self.provider, dict) else self.provider or "").strip(),
+                    str(self.model or "").strip(),
                     load_config(),
-                    requested_provider=(self.requested_provider or "").strip(),
+                    requested_provider=str(self.requested_provider.get("name", "") if isinstance(self.requested_provider, dict) else self.requested_provider or "").strip(),
                 )
             except Exception as _img_exc:
                 logging.debug("image_routing decision failed, defaulting to text: %s", _img_exc)
@@ -18312,12 +18315,10 @@ def main(
                             from kenxcode_cli.config import load_config
 
                             _img_mode = decide_image_input_mode(
-                                (cli.provider or "").strip(),
-                                (cli.model or "").strip(),
+                                str(cli.provider.get("name", "") if isinstance(cli.provider, dict) else cli.provider or "").strip(),
+                                str(cli.model or "").strip(),
                                 load_config(),
-                                requested_provider=(
-                                    cli.requested_provider or ""
-                                ).strip(),
+                                requested_provider=str(cli.requested_provider.get("name", "") if isinstance(cli.requested_provider, dict) else cli.requested_provider or "").strip(),
                             )
                         except Exception:
                             _img_mode = "text"
