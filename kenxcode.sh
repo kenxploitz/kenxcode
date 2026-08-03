@@ -163,8 +163,27 @@ do_install() {
     # Install package
     info "Installing KenXCode package..."
     cd "$INSTALL_DIR/kenxcode-agent"
-    "$INSTALL_DIR/venv/bin/python3" -m pip install -e "." --quiet 2>&1 | tail -3
-    success "KenXCode installed"
+    
+    # Install with pip (not editable mode for reliability)
+    "$INSTALL_DIR/venv/bin/python3" -m pip install . 2>&1 | tail -5
+    
+    # Verify installation
+    if "$INSTALL_DIR/venv/bin/python3" -c "import kenxcode_cli" 2>/dev/null; then
+        success "KenXCode installed"
+    else
+        warn "Install may have failed, trying editable mode..."
+        "$INSTALL_DIR/venv/bin/python3" -m pip install -e . 2>&1 | tail -5
+        
+        if "$INSTALL_DIR/venv/bin/python3" -c "import kenxcode_cli" 2>/dev/null; then
+            success "KenXCode installed (editable)"
+        else
+            fail "Installation failed!"
+            printf "  Try manually:\n"
+            printf "    cd %s/kenxcode-agent\n" "$INSTALL_DIR"
+            printf "    %s/bin/python3 -m pip install -e .\n" "$INSTALL_DIR/venv"
+            exit 1
+        fi
+    fi
 
     printf "\n"
 
