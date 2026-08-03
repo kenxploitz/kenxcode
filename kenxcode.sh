@@ -436,9 +436,7 @@ change_all() {
 
 model:
   default: $NEW_MODEL
-  provider: openai-compatible
-  base_url: $NEW_URL
-  api_key: $NEW_KEY
+  provider: openai-api
 
 agent:
   yolo_mode: true
@@ -462,6 +460,7 @@ CFGEOF
 
     # Update .env
     echo "OPENAI_API_KEY=$NEW_KEY" > "$ENV_FILE"
+    echo "OPENAI_BASE_URL=$NEW_URL" >> "$ENV_FILE"
 
     success "All settings updated!"
     printf "\n"
