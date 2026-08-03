@@ -5,6 +5,7 @@
 # Usage:
 #   ./kenxcode.sh              # Install + Setup menu
 #   ./kenxcode.sh --uninstall  # Direct uninstall
+#   ./kenxcode.sh --update     # Update to latest version
 #   ./kenxcode.sh --help       # Show help
 # ============================================================
 
@@ -297,10 +298,11 @@ do_setup_menu() {
         printf "    ${CYAN}3)${NC} Change Model\n"
         printf "    ${CYAN}4)${NC} Change All (URL + Key + Model)\n"
         printf "    ${CYAN}5)${NC} Test API Connection\n"
-        printf "    ${CYAN}6)${NC} Uninstall KenXCode\n"
-        printf "    ${CYAN}7)${NC} Exit\n"
+        printf "    ${CYAN}6)${NC} Update KenXCode\n"
+        printf "    ${CYAN}7)${NC} Uninstall KenXCode\n"
+        printf "    ${CYAN}8)${NC} Exit\n"
         printf "\n"
-        printf "  Select [1-7]: "
+        printf "  Select [1-8]: "
         read CHOICE
 
         case "$CHOICE" in
@@ -309,8 +311,9 @@ do_setup_menu() {
             3) change_model ;;
             4) change_all ;;
             5) test_api ;;
-            6) do_uninstall ;;
-            7)
+            6) do_update ;;
+            7) do_uninstall ;;
+            8)
                 printf "\n  Bye! ⚡\n\n"
                 exit 0
                 ;;
@@ -504,6 +507,84 @@ except:
 }
 
 # ============================================================
+# UPDATE
+# ============================================================
+do_update() {
+    printf "\n"
+    printf "  ${CYAN}${BOLD}UPDATE KENXCODE${NC}\n"
+    printf "\n"
+
+    # Find KenXCode source
+    SOURCE_DIR=""
+    if [ -d "$INSTALL_DIR/kenxcode-agent" ]; then
+        SOURCE_DIR="$INSTALL_DIR/kenxcode-agent"
+    elif [ -d "$HOME/kenxcode" ]; then
+        SOURCE_DIR="$HOME/kenxcode"
+    elif [ -d "$SCRIPT_DIR/.git" ]; then
+        SOURCE_DIR="$SCRIPT_DIR"
+    fi
+
+    if [ -z "$SOURCE_DIR" ] || [ ! -d "$SOURCE_DIR/.git" ]; then
+        fail "KenXCode source not found! Run install first or clone the repo."
+        return
+    fi
+
+    info "Source: $SOURCE_DIR"
+
+    # Check current version
+    if [ -f "$SOURCE_DIR/pyproject.toml" ]; then
+        CUR_VER=$(grep 'version' "$SOURCE_DIR/pyproject.toml" 2>/dev/null | head -1 | sed 's/.*"\(.*\)".*/\1/')
+        info "Current version: $CUR_VER"
+    fi
+
+    # Pull latest from GitHub
+    info "Pulling latest from GitHub..."
+    cd "$SOURCE_DIR"
+    git pull origin main 2>&1 | tail -5
+
+    if [ $? -ne 0 ]; then
+        warn "Git pull failed, trying reset..."
+        git fetch origin main
+        git reset --hard origin/main 2>&1 | tail -3
+    fi
+
+    # Check new version
+    NEW_VER=$(grep 'version' "$SOURCE_DIR/pyproject.toml" 2>/dev/null | head -1 | sed 's/.*"\(.*\)".*/\1/')
+    info "New version: $NEW_VER"
+
+    # Reinstall package
+    info "Reinstalling package..."
+    "$INSTALL_DIR/venv/bin/python3" -m pip install "$SOURCE_DIR" 2>&1 | tail -3
+
+    # Copy updated files
+    if [ -f "$SOURCE_DIR/SOUL.md" ]; then
+        cp "$SOURCE_DIR/SOUL.md" "$SOUL_FILE"
+    fi
+    if [ -d "$SOURCE_DIR/skills" ]; then
+        cp -r "$SOURCE_DIR/skills/"* "$INSTALL_DIR/skills/" 2>/dev/null
+    fi
+    if [ -f "$SOURCE_DIR/uninstall.sh" ]; then
+        cp "$SOURCE_DIR/uninstall.sh" "$INSTALL_DIR/uninstall.sh"
+        chmod +x "$INSTALL_DIR/uninstall.sh"
+    fi
+    if [ -f "$SOURCE_DIR/kenxcode.sh" ]; then
+        cp "$SOURCE_DIR/kenxcode.sh" "$INSTALL_DIR/kenxcode.sh"
+        chmod +x "$INSTALL_DIR/kenxcode.sh"
+    fi
+
+    # Verify
+    if "$INSTALL_DIR/venv/bin/python3" -c "import kenxcode_cli" 2>/dev/null; then
+        success "Update complete! v$CUR_VER -> v$NEW_VER"
+    else
+        warn "Update complete but verification failed"
+    fi
+
+    printf "\n"
+    printf "  Press Enter to continue..."
+    read _
+}
+
+# ============================================================
 # UNINSTALL
 # ============================================================
 do_uninstall() {
@@ -562,6 +643,7 @@ show_help() {
     printf "  Usage:\n"
     printf "    ./kenxcode.sh              # Install + Setup menu\n"
     printf "    ./kenxcode.sh --uninstall  # Direct uninstall\n"
+    printf "    ./kenxcode.sh --update     # Update to latest version\n"
     printf "    ./kenxcode.sh --help       # Show this help\n"
     printf "\n"
     printf "  After install:\n"
@@ -578,6 +660,14 @@ case "${1:-}" in
     --uninstall|-u)
         if is_installed; then
             do_uninstall
+        else
+            banner
+            fail "KenXCode not installed!"
+        fi
+        ;;
+    --update)
+        if is_installed; then
+            do_update
         else
             banner
             fail "KenXCode not installed!"
