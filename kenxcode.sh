@@ -254,7 +254,7 @@ do_setup_menu() {
             CUR_MODEL=$(grep "model:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk '{print $2}')
             CUR_KEY=$(grep "OPENAI_API_KEY=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2)
             if [ -n "$CUR_KEY" ]; then
-                MASKED_KEY="$(echo "$CUR_KEY" | cut -c1-8)...$(echo "$CUR_KEY" | rev | cut -c1-4 | rev)"
+                MASKED_KEY=`echo "$CUR_KEY" | cut -c1-8`...`echo "$CUR_KEY" | rev | cut -c1-4 | rev`
             else
                 MASKED_KEY="not set"
             fi
