@@ -350,6 +350,10 @@ change_api_url() {
     if [ -f "$CONFIG_FILE" ]; then
         sed -i "s|base_url:.*|base_url: $NEW_URL|" "$CONFIG_FILE"
     fi
+    # Update .env
+    if [ -f "$ENV_FILE" ]; then
+        sed -i "s|OPENAI_BASE_URL=.*|OPENAI_BASE_URL=$NEW_URL|" "$ENV_FILE"
+    fi
     success "API URL updated: $NEW_URL"
     printf "\n"
     printf "  Press Enter to continue..."
@@ -371,6 +375,10 @@ change_api_key() {
     fi
     # Update .env
     echo "OPENAI_API_KEY=$NEW_KEY" > "$ENV_FILE"
+    # Update config.yaml
+    if [ -f "$CONFIG_FILE" ]; then
+        sed -i "s|api_key:.*|api_key: $NEW_KEY|" "$CONFIG_FILE"
+    fi
     success "API Key updated"
     printf "\n"
     printf "  Press Enter to continue..."
