@@ -636,7 +636,13 @@ def build_welcome_banner(console: "Console", model: str, cwd: str,
         _bskin = None
         _hero = KENXCODE_CADUCEUS
     left_lines = ["", _hero, ""]
-    if (provider or "").strip().lower() == "moa":
+    # provider can be a dict (from config) or string — normalize to string
+    provider_str = ""
+    if isinstance(provider, dict):
+        provider_str = str(provider.get("name") or provider.get("default") or "")
+    elif isinstance(provider, str):
+        provider_str = provider
+    if (provider_str or "").strip().lower() == "moa":
         # MoA virtual provider: ``model`` is a preset name. Show the preset and
         # its aggregator so the banner is meaningful instead of a bare slug.
         preset_name = model
