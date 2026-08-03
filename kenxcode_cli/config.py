@@ -1377,7 +1377,7 @@ def _normalize_custom_provider_entry(
     raw_name = entry.get("name")
     if isinstance(raw_name, str) and raw_name.strip():
         name = raw_name.strip()
-    elif provider_key.strip():
+    elif isinstance(provider_key, str) and provider_key.strip():
         name = provider_key.strip()
     if not name:
         return None
@@ -1387,7 +1387,10 @@ def _normalize_custom_provider_entry(
         "base_url": base_url,
     }
 
-    provider_key = provider_key.strip()
+    if isinstance(provider_key, str):
+        provider_key = provider_key.strip()
+    else:
+        provider_key = ""
     if provider_key:
         normalized["provider_key"] = provider_key
 
